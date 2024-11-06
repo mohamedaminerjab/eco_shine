@@ -4,6 +4,7 @@
 #include <QDialog>
 #include <QSqlTableModel>
 #include "connection.h"
+#include "updateclientdialog.h"
 
 namespace Ui {
 class clientwindow;
@@ -21,6 +22,8 @@ private slots:
     void on_createButton_clicked();
     void createClient();
     void refreshClientList();
+    void on_clientTableView_clicked(const QModelIndex &index);
+
 
 private:
     Ui::clientwindow *ui;

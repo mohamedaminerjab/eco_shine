@@ -1,5 +1,6 @@
 #include "clientwindow.h"
 #include "ui_clientwindow.h"
+#include "updateclientdialog.h"
 #include <QMessageBox>
 #include <QSqlQuery>
 #include <QSqlTableModel>
@@ -131,4 +132,41 @@ void clientwindow::refreshClientList()
 void clientwindow::on_createButton_clicked()
 {
     createClient();
+}
+
+void clientwindow::on_clientTableView_clicked(const QModelIndex &index)
+{
+
+
+    // Get the row data
+    QString id = model->data(model->index(index.row(), 2)).toString(); // IDENTIFIANT column
+    QString nom = model->data(model->index(index.row(), 0)).toString(); // NOM column
+    QString contact = model->data(model->index(index.row(), 1)).toString(); // CONTACT column
+    QString adresse = model->data(model->index(index.row(), 3)).toString(); // ADRESSE column
+
+    // Create and show the update dialog
+    updateclientdialog updateDialog(id, nom, adresse, contact, this);
+
+    if (updateDialog.exec() == QDialog::Accepted) {
+        // Get the updated values
+        QString newNom = updateDialog.getNom();
+        QString newAdresse = updateDialog.getAdresse();
+        QString newContact = updateDialog.getContact();
+
+        // Update the database
+        QSqlQuery query;
+        query.prepare("UPDATE CLIENT SET NOM = :nom, ADRESSE = :adresse, CONTACT = :contact "
+                      "WHERE IDENTIFIANT = :id");
+        query.bindValue(":nom", newNom);
+        query.bindValue(":adresse", newAdresse);
+        query.bindValue(":contact", newContact);
+        query.bindValue(":id", id);
+
+        if (query.exec()) {
+            QMessageBox::information(this, "Success", "Client updated successfully!");
+            refreshClientList(); // Refresh the table view
+        } else {
+            QMessageBox::critical(this, "Error", "Failed to update client: " + query.lastError().text());
+        }
+    }
 }

@@ -27,14 +27,17 @@ CONFIG += c++11
 SOURCES += \
     clientwindow.cpp \
         main.cpp \
-    connection.cpp
+    connection.cpp \
+    updateclientdialog.cpp
 
 HEADERS += \
     clientwindow.h \
-    connection.h
+    connection.h \
+    updateclientdialog.h
 
 FORMS += \
-        clientwindow.ui
+        clientwindow.ui \
+        updateclientdialog.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
