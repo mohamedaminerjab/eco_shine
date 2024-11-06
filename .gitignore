@@ -51,3 +51,8 @@ desktop.ini
 # Common IDE-specific files
 .idea/
 .vscode/
+
+
+# Ignore the build directory
+build/
+
