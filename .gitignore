@@ -1,0 +1,53 @@
+# Compiled Object files
+*.o
+*.obj
+
+# Compiled Dynamic libraries
+*.dll
+*.so
+*.dylib
+
+# Compiled Static libraries
+*.a
+*.lib
+
+# Executable files
+*.exe
+*.out
+*.app
+*.hex
+
+# Qt Creator specific files
+*.pro.user
+*.pro.user.*
+*.qbs.user
+*.qbs.user.*
+*.creator.user
+*.creator.user.*
+*.autosave
+
+# Qt Designer files
+*.bak
+
+# qmake generated Makefile and related files
+Makefile
+Makefile.*
+qrc_*.cpp
+ui_*.h
+moc_*.cpp
+
+# Build folders
+build-*/
+debug/
+release/
+
+# macOS specific files
+.DS_Store
+
+# Windows specific files
+Thumbs.db
+desktop.ini
+
+# Common IDE-specific files
+.idea/
+.vscode/
