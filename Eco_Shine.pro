@@ -25,15 +25,18 @@ DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += c++11
 
 SOURCES += \
+    clientwindow.cpp \
         main.cpp \
         mainwindow.cpp \
     connection.cpp
 
 HEADERS += \
+    clientwindow.h \
         mainwindow.h \
     connection.h
 
 FORMS += \
+        clientwindow.ui \
         mainwindow.ui
 
 # Default rules for deployment.

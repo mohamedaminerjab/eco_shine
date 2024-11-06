@@ -1,26 +1,34 @@
-#include "mainwindow.h"
+#include "clientwindow.h"
 #include <QApplication>
 #include <QMessageBox>
 #include "connection.h"
+
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    MainWindow w;
+
+    // Create the connection object
     Connection c;
-    bool test=c.createconnect();
-    if(test)
-    {w.show();
-        QMessageBox::information(nullptr, QObject::tr("database is open"),
-                                 QObject::tr("connection successful.\n"
+
+    clientwindow cw(c);
+
+
+    // Try to connect to the database
+    bool test = c.createconnect();
+
+    if (test) {
+        // Create the client window and pass the connection object by reference
+        cw.show();
+        // Optionally, display the connection success message
+        QMessageBox::information(nullptr, QObject::tr("Database is open"),
+                                 QObject::tr("Connection successful.\n"
                                              "Click Cancel to exit."), QMessageBox::Cancel);
-
-    }
-    else
-        QMessageBox::critical(nullptr, QObject::tr("database is not open"),
-                              QObject::tr("connection failed.\n"
+    } else {
+        // Show a critical error message if the connection fails
+        QMessageBox::critical(nullptr, QObject::tr("Database is not open"),
+                              QObject::tr("Connection failed.\n"
                                           "Click Cancel to exit."), QMessageBox::Cancel);
+    }
 
-
-
-    return a.exec();
+    return a.exec();  // Start the Qt event loop
 }
