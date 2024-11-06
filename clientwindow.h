@@ -22,7 +22,9 @@ private slots:
     void on_createButton_clicked();
     void createClient();
     void refreshClientList();
-    void on_clientTableView_clicked(const QModelIndex &index);
+    void on_clientTableView_doubleClicked(const QModelIndex &index);
+    void on_deleteButton_clicked();
+
 
 
 private:

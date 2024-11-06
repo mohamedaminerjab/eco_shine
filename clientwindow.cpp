@@ -134,10 +134,8 @@ void clientwindow::on_createButton_clicked()
     createClient();
 }
 
-void clientwindow::on_clientTableView_clicked(const QModelIndex &index)
+void clientwindow::on_clientTableView_doubleClicked(const QModelIndex &index)
 {
-
-
     // Get the row data
     QString id = model->data(model->index(index.row(), 2)).toString(); // IDENTIFIANT column
     QString nom = model->data(model->index(index.row(), 0)).toString(); // NOM column
@@ -167,6 +165,39 @@ void clientwindow::on_clientTableView_clicked(const QModelIndex &index)
             refreshClientList(); // Refresh the table view
         } else {
             QMessageBox::critical(this, "Error", "Failed to update client: " + query.lastError().text());
+        }
+    }
+}
+
+void clientwindow::on_deleteButton_clicked()
+{
+    // Get the current selection
+    QModelIndex currentIndex = ui->clientTableView->currentIndex();
+    if (!currentIndex.isValid()) {
+        QMessageBox::warning(this, "Selection Error", "Please select a client to delete.");
+        return;
+    }
+
+    // Get the client ID and name for confirmation
+    QString id = model->data(model->index(currentIndex.row(), 2)).toString(); // IDENTIFIANT column
+    QString nom = model->data(model->index(currentIndex.row(), 0)).toString(); // NOM column
+
+    // Confirm deletion
+    QMessageBox::StandardButton reply = QMessageBox::question(this, "Confirm Deletion",
+                                                              "Are you sure you want to delete client: " + nom + "?",
+                                                              QMessageBox::Yes|QMessageBox::No);
+
+    if (reply == QMessageBox::Yes) {
+        // Delete from database
+        QSqlQuery query;
+        query.prepare("DELETE FROM CLIENT WHERE IDENTIFIANT = :id");
+        query.bindValue(":id", id);
+
+        if (query.exec()) {
+            QMessageBox::information(this, "Success", "Client deleted successfully!");
+            refreshClientList(); // Refresh the table view
+        } else {
+            QMessageBox::critical(this, "Error", "Failed to delete client: " + query.lastError().text());
         }
     }
 }
