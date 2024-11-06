@@ -9,12 +9,12 @@ int main(int argc, char *argv[])
 
     // Create the connection object
     Connection c;
+    bool test = c.createconnect();
 
     clientwindow cw(c);
 
 
     // Try to connect to the database
-    bool test = c.createconnect();
 
     if (test) {
         // Create the client window and pass the connection object by reference
