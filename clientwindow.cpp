@@ -42,6 +42,14 @@ clientwindow::clientwindow(Connection &conn, QWidget *parent) :
     ui->clientTableView->setSelectionBehavior(QAbstractItemView::SelectRows);
     ui->clientTableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
+    // Enable sorting
+    ui->clientTableView->setSortingEnabled(true);
+    model->setSort(0, Qt::AscendingOrder); // Initially sort by first column (NOM)
+
+    // Make columns stretch to fill the available space
+    ui->clientTableView->horizontalHeader()->setStretchLastSection(true);
+    ui->clientTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+
     // Make columns stretch to fill the available space
     ui->clientTableView->horizontalHeader()->setStretchLastSection(true);
     ui->clientTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
@@ -110,8 +118,10 @@ void clientwindow::createClient()
 
 void clientwindow::refreshClientList()
 {
-    // Store current filter
+    // Store current filter and sorting
     QString currentFilter = model->filter();
+    int currentSortColumn = ui->clientTableView->horizontalHeader()->sortIndicatorSection();
+    Qt::SortOrder currentSortOrder = ui->clientTableView->horizontalHeader()->sortIndicatorOrder();
 
     // Debug: Print current row count
     qDebug() << "Before refresh, row count:" << model->rowCount();
@@ -136,6 +146,10 @@ void clientwindow::refreshClientList()
     if (!currentFilter.isEmpty()) {
         model->setFilter(currentFilter);
     }
+
+    // Reapply the sorting
+    model->setSort(currentSortColumn, currentSortOrder);
+    model->select();
 
     // Debug: Print new row count
     qDebug() << "After refresh, row count:" << model->rowCount();
