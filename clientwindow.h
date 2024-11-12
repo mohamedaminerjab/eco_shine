@@ -24,6 +24,8 @@ private slots:
     void refreshClientList();
     void on_clientTableView_doubleClicked(const QModelIndex &index);
     void on_deleteButton_clicked();
+    void on_searchLineEdit_textChanged(const QString &text);
+
 
 
 

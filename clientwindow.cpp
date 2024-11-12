@@ -46,6 +46,10 @@ clientwindow::clientwindow(Connection &conn, QWidget *parent) :
     ui->clientTableView->horizontalHeader()->setStretchLastSection(true);
     ui->clientTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
+    connect(ui->searchLineEdit, &QLineEdit::textChanged, this, &clientwindow::on_searchLineEdit_textChanged);
+
+
+
     // Debug: Print the number of rows in the model
     qDebug() << "Number of rows in model:" << model->rowCount();
 
@@ -106,6 +110,9 @@ void clientwindow::createClient()
 
 void clientwindow::refreshClientList()
 {
+    // Store current filter
+    QString currentFilter = model->filter();
+
     // Debug: Print current row count
     qDebug() << "Before refresh, row count:" << model->rowCount();
 
@@ -124,6 +131,11 @@ void clientwindow::refreshClientList()
     model->setHeaderData(1, Qt::Horizontal, tr("CONTACT"));
     model->setHeaderData(2, Qt::Horizontal, tr("IDENTIFIANT"));
     model->setHeaderData(3, Qt::Horizontal, tr("ADRESSE"));
+
+    // Reapply the filter if there was one
+    if (!currentFilter.isEmpty()) {
+        model->setFilter(currentFilter);
+    }
 
     // Debug: Print new row count
     qDebug() << "After refresh, row count:" << model->rowCount();
@@ -201,3 +213,32 @@ void clientwindow::on_deleteButton_clicked()
         }
     }
 }
+
+void clientwindow::on_searchLineEdit_textChanged(const QString &text)
+{
+    // Create the filter condition for multiple columns
+    QString filter;
+    if (!text.isEmpty()) {
+        QStringList filters;
+        filters << QString("NOM LIKE '%%1%'").arg(text)
+                << QString("CONTACT LIKE '%%1%'").arg(text)
+                << QString("ADRESSE LIKE '%%1%'").arg(text)
+                << QString("IDENTIFIANT LIKE '%%1%'").arg(text);
+
+        // Combine filters with OR
+        filter = filters.join(" OR ");
+    }
+
+    // Apply the filter
+    model->setFilter(filter);
+
+    // Debug output
+    qDebug() << "Applied filter:" << filter;
+    qDebug() << "Filtered rows:" << model->rowCount();
+
+    if (model->lastError().isValid()) {
+        qDebug() << "Filter error:" << model->lastError().text();
+    }
+}
+
+
