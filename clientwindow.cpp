@@ -8,6 +8,10 @@
 #include <QDebug>
 #include <QtCharts/QPieSeries>
 #include <QtCharts/QChartView>
+#include <QPrinter>
+#include <QPainter>
+#include <QFileDialog>
+#include <QDateTime>
 
 
 clientwindow::clientwindow(Connection &conn, QWidget *parent) :
@@ -97,8 +101,9 @@ clientwindow::clientwindow(Connection &conn, QWidget *parent) :
         qDebug() << "Test query failed:" << testQuery.lastError().text();
     }
 
-    // Connect the refresh button
     connect(ui->refreshButton, &QPushButton::clicked, this, &clientwindow::refreshClientList);
+    connect(ui->pdfButton, &QPushButton::clicked, this, &clientwindow::on_pdfButton_clicked);
+
 }
 
 clientwindow::~clientwindow()
@@ -358,3 +363,135 @@ void clientwindow::updateStatsChart()
 }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+void clientwindow::on_pdfButton_clicked()
+{
+    QString fileName = QFileDialog::getSaveFileName(this,
+                                                    tr("Save PDF"), QString(),
+                                                    tr("PDF Files (*.pdf);;All Files (*)"));
+
+    if (fileName.isEmpty())
+        return;
+
+    if (!fileName.endsWith(".pdf"))
+        fileName += ".pdf";
+
+    QPrinter printer(QPrinter::HighResolution);
+    printer.setOutputFormat(QPrinter::PdfFormat);
+    printer.setOutputFileName(fileName);
+    printer.setPageSize(QPageSize(QPageSize::A4));
+
+    QPainter painter(&printer);
+    painter.begin(&printer);
+
+    // Fonts and settings
+    QFont titleFont("Arial", 12, QFont::Bold);    // Reduced from 16 to 12
+    QFont headerFont("Arial", 8, QFont::Bold);    // Reduced from 10 to 8
+    QFont contentFont("Arial", 7);                // Reduced from 9 to 7
+
+    // Adjusted margins
+    const int margin = 40;
+    const int rowHeight = 600;                     // Keeping this as per the original code
+    int currentY = margin;
+
+    // Get page width excluding margins
+    int pageWidth = printer.pageRect(QPrinter::Point).width() - (2 * margin);
+
+    // Column widths (keeping as per the original code)
+    QVector<int> columnWidths = {
+        static_cast<int>(pageWidth * 0.20 * 9),  // Name
+        static_cast<int>(pageWidth * 0.20 * 9),  // Contact
+        static_cast<int>(pageWidth * 0.15 * 9),  // ID
+        static_cast<int>(pageWidth * 0.45 * 9)   // Address - increased for longer text
+    };
+
+    // Draw title
+    painter.setFont(titleFont);
+    QRect titleRect(margin, currentY, pageWidth, rowHeight * 1.5);
+    painter.drawText(titleRect, Qt::AlignCenter, "Client List");
+    currentY += rowHeight * 1.5;
+
+    // Draw date with smaller spacing
+    painter.setFont(contentFont);
+    QString datetime = QDateTime::currentDateTime().toString("Generated on: yyyy-MM-dd hh:mm:ss");
+    painter.drawText(margin, currentY, datetime);
+    currentY += rowHeight;
+
+    // Function to draw table row with borders
+    auto drawTableRow = [&](const QStringList& rowData, const QFont& font, bool isHeader = false) {
+        painter.setFont(font);
+        int currentX = margin;
+
+        // Draw horizontal line above
+        painter.drawLine(margin, currentY, margin + pageWidth, currentY);
+
+        for (int i = 0; i < rowData.size(); ++i) {
+            // Draw cell borders
+            QRect cellRect(currentX, currentY, columnWidths[i], rowHeight);
+            painter.drawRect(cellRect);
+
+            // Draw text with smaller padding
+            QString text = rowData[i];
+            QFontMetrics fm(font);
+            QString elidedText = fm.elidedText(text, Qt::ElideRight, columnWidths[i] - 4); // Reduced padding
+
+            QRect textRect = cellRect.adjusted(2, 0, -2, 0); // Reduced padding from 5 to 2
+            painter.drawText(textRect, Qt::AlignLeft | Qt::AlignVCenter, elidedText);
+
+            currentX += columnWidths[i];
+        }
+
+        return currentY + rowHeight;
+    };
+
+    // Draw headers
+    QStringList headers = {"Name", "Contact", "ID", "Address"};
+    currentY = drawTableRow(headers, headerFont, true);
+
+    // Draw content
+    painter.setFont(contentFont);
+    for (int row = 0; row < model->rowCount(); ++row) {
+        // Check if the next row will fit on the current page
+        if (currentY + rowHeight > printer.pageRect(QPrinter::Point).height() - margin) {
+            // Check if adding another row will exceed the page bottom and start a new page
+            printer.newPage();
+            currentY = margin;
+
+            // Redraw headers on new page
+            currentY = drawTableRow(headers, headerFont, true);
+        }
+
+        // Prepare row data
+        QStringList rowData;
+        for (int col = 0; col < model->columnCount(); ++col) {
+            rowData << model->data(model->index(row, col)).toString();
+        }
+
+        // Draw the row
+        currentY = drawTableRow(rowData, contentFont);
+    }
+
+    // Draw final horizontal line
+    painter.drawLine(margin, currentY, margin + pageWidth, currentY);
+
+    painter.end();
+
+    QMessageBox::information(this, "Success", "PDF has been generated successfully!");
+}

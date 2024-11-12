@@ -162,6 +162,19 @@
       </rect>
      </property>
     </widget>
+    <widget class="QPushButton" name="pdfButton">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>270</y>
+       <width>75</width>
+       <height>24</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>PDF</string>
+     </property>
+    </widget>
    </widget>
    <widget class="QWidget" name="statTab">
     <attribute name="title">
