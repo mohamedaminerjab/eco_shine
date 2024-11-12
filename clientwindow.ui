@@ -163,6 +163,11 @@
      </property>
     </widget>
    </widget>
+   <widget class="QWidget" name="statTab">
+    <attribute name="title">
+     <string>Statestiques</string>
+    </attribute>
+   </widget>
   </widget>
  </widget>
  <resources/>

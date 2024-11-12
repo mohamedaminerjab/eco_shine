@@ -5,6 +5,9 @@
 #include <QSqlTableModel>
 #include "connection.h"
 #include "updateclientdialog.h"
+#include <QtCharts>
+#include <QtCharts/QPieSeries>
+#include <QtCharts/QChartView>
 
 namespace Ui {
 class clientwindow;
@@ -33,6 +36,9 @@ private:
     Ui::clientwindow *ui;
     Connection &connection;
     QSqlTableModel *model;
+    void updateStatsChart();
+    QChart *statsChart;
+    QChartView *chartView;
 };
 
 #endif // CLIENTWINDOW_H

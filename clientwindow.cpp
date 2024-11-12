@@ -6,6 +6,9 @@
 #include <QSqlTableModel>
 #include <QSqlError>
 #include <QDebug>
+#include <QtCharts/QPieSeries>
+#include <QtCharts/QChartView>
+
 
 clientwindow::clientwindow(Connection &conn, QWidget *parent) :
     QDialog(parent),
@@ -50,13 +53,34 @@ clientwindow::clientwindow(Connection &conn, QWidget *parent) :
     ui->clientTableView->horizontalHeader()->setStretchLastSection(true);
     ui->clientTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
-    // Make columns stretch to fill the available space
-    ui->clientTableView->horizontalHeader()->setStretchLastSection(true);
-    ui->clientTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-
     connect(ui->searchLineEdit, &QLineEdit::textChanged, this, &clientwindow::on_searchLineEdit_textChanged);
 
+    // Initialize chart components
+    statsChart = new QChart();
+    chartView = new QChartView(statsChart);
+    chartView->setRenderHint(QPainter::Antialiasing);
 
+    // Find the statTab and set up its layout
+    if (QWidget* statTab = ui->statTab) {  // Changed from tabWidget->widget(1) to ui->statTab
+        QVBoxLayout* layout = new QVBoxLayout(statTab);
+        layout->addWidget(chartView);
+        statTab->setLayout(layout);
+    } else {
+        qDebug() << "Failed to find statTab";
+    }
+
+    // Update the stats initially
+    updateStatsChart();
+
+    // Connect refresh button to also update stats
+    connect(ui->refreshButton, &QPushButton::clicked, this, &clientwindow::updateStatsChart);
+
+    // Connect tab widget's currentChanged signal to update stats when switching to stats tab
+    connect(ui->tabWidget, &QTabWidget::currentChanged, this, [this](int index) {
+        if (ui->tabWidget->widget(index) == ui->statTab) {  // Changed to check for statTab directly
+            updateStatsChart();
+        }
+    });
 
     // Debug: Print the number of rows in the model
     qDebug() << "Number of rows in model:" << model->rowCount();
@@ -81,6 +105,8 @@ clientwindow::~clientwindow()
 {
     delete ui;
     delete model;
+    delete statsChart;    // Add this
+    delete chartView;     // Add this
 }
 
 void clientwindow::createClient()
@@ -153,6 +179,9 @@ void clientwindow::refreshClientList()
 
     // Debug: Print new row count
     qDebug() << "After refresh, row count:" << model->rowCount();
+
+    updateStatsChart();
+
 }
 
 void clientwindow::on_createButton_clicked()
@@ -253,6 +282,79 @@ void clientwindow::on_searchLineEdit_textChanged(const QString &text)
     if (model->lastError().isValid()) {
         qDebug() << "Filter error:" << model->lastError().text();
     }
+}
+
+void clientwindow::updateStatsChart()
+{
+    // Clear the old chart
+    statsChart->removeAllSeries();
+
+    // Create a new pie series
+    QPieSeries *series = new QPieSeries();
+
+    // Query to count clients by address
+    QSqlQuery query;
+    query.prepare("SELECT ADRESSE, COUNT(*) as count "
+                  "FROM CLIENT "
+                  "GROUP BY ADRESSE "
+                  "ORDER BY count DESC");
+
+    if (query.exec()) {
+        // Map to store address counts
+        QMap<QString, int> addressCounts;
+        int totalClients = 0;
+
+        // Collect the data
+        while (query.next()) {
+            QString address = query.value("ADRESSE").toString();
+            int count = query.value("count").toInt();
+            addressCounts[address] = count;
+            totalClients += count;
+        }
+
+        // Add slices to the pie series
+        for (auto it = addressCounts.begin(); it != addressCounts.end(); ++it) {
+            QString address = it.key();
+            int count = it.value();
+            qreal percentage = (count * 100.0) / totalClients;
+
+            // Create slice with percentage in label
+            QString label = QString("%1\n%2%\n(%3)")
+                                .arg(address)
+                                .arg(QString::number(percentage, 'f', 1))
+                                .arg(count);
+
+            QPieSlice *slice = series->append(label, count);
+
+            // Set random color for the slice
+            slice->setColor(QColor(rand() % 256, rand() % 256, rand() % 256));
+
+            // Make slices slightly exploded
+            slice->setExploded(true);
+            slice->setExplodeDistanceFactor(0.1);
+
+            // Connect hover signals to show/hide label
+            connect(slice, &QPieSlice::hovered, [slice](bool show) {
+                slice->setLabelVisible(show);
+            });
+        }
+    } else {
+        qDebug() << "Stats query failed:" << query.lastError().text();
+    }
+
+    // Add the series to the chart
+    statsChart->addSeries(series);
+
+    // Set chart title
+    statsChart->setTitle("Client Distribution by Address");
+
+    // Customize the chart
+    statsChart->setAnimationOptions(QChart::AllAnimations);
+    statsChart->legend()->setVisible(true);
+    statsChart->legend()->setAlignment(Qt::AlignRight);
+
+    // Update the view
+    chartView->setChart(statsChart);
 }
 
 
