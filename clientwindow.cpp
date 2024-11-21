@@ -104,6 +104,56 @@ clientwindow::clientwindow(Connection &conn, QWidget *parent) :
     connect(ui->refreshButton, &QPushButton::clicked, this, &clientwindow::refreshClientList);
     connect(ui->pdfButton, &QPushButton::clicked, this, &clientwindow::on_pdfButton_clicked);
 
+    // Initialize the rating system
+    currentRating = 0;
+
+
+    // Find tab_3 and set up its layout
+    if (QWidget* reviewTab = ui->tab_3) {
+        QVBoxLayout* mainLayout = new QVBoxLayout(reviewTab);
+
+        // Create horizontal layout for stars
+        QHBoxLayout* starsLayout = new QHBoxLayout();
+
+        // Create star buttons
+        for (int i = 0; i < 5; i++) {
+            QPushButton* starButton = new QPushButton("☆");
+            starButton->setFixedSize(40, 40);
+            starButton->setStyleSheet(
+                "QPushButton { font-size: 24px; border: none; } "
+                "QPushButton:hover { color: gold; }");
+
+            // Connect each button
+            connect(starButton, &QPushButton::clicked, this, [this, i]() {
+                updateStarRating(i + 1);
+            });
+
+            starsLayout->addWidget(starButton);
+            starButtons.append(starButton);
+        }
+
+        // Add stretches for centering
+        starsLayout->insertStretch(0);
+        starsLayout->addStretch();
+
+        // Create description text edit
+        QTextEdit* descriptionEdit = new QTextEdit();
+        descriptionEdit->setPlaceholderText("Enter your review here...");
+        descriptionEdit->setMaximumHeight(100);
+        descriptionEdit->setObjectName("descriptionEdit");
+
+        // Create submit button
+        QPushButton* submitButton = new QPushButton("Submit Review");
+        submitButton->setObjectName("submitReviewButton");
+        connect(submitButton, &QPushButton::clicked, this, &clientwindow::on_submitReviewButton_clicked);
+
+        // Add widgets to main layout
+        mainLayout->addLayout(starsLayout);
+        mainLayout->addWidget(descriptionEdit);
+        mainLayout->addWidget(submitButton);
+        mainLayout->addStretch();
+    }
+
 }
 
 clientwindow::~clientwindow()
@@ -365,22 +415,6 @@ void clientwindow::updateStatsChart()
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 void clientwindow::on_pdfButton_clicked()
 {
     QString fileName = QFileDialog::getSaveFileName(this,
@@ -494,4 +528,54 @@ void clientwindow::on_pdfButton_clicked()
     painter.end();
 
     QMessageBox::information(this, "Success", "PDF has been generated successfully!");
+}
+
+
+void clientwindow::updateStarRating(int rating) {
+    currentRating = rating;
+
+    // Update star appearance
+    for (int i = 0; i < starButtons.size(); i++) {
+        if (i < rating) {
+            starButtons[i]->setText("★");
+            starButtons[i]->setStyleSheet(
+                "QPushButton { font-size: 24px; border: none; color: gold; }");
+        } else {
+            starButtons[i]->setText("☆");
+            starButtons[i]->setStyleSheet(
+                "QPushButton { font-size: 24px; border: none; } "
+                "QPushButton:hover { color: gold; }");
+        }
+    }
+}
+
+void clientwindow::on_submitReviewButton_clicked() {
+    if (currentRating == 0) {
+        QMessageBox::warning(this, "Rating Required", "Please select a rating before submitting.");
+        return;
+    }
+
+    QTextEdit* descriptionEdit = findChild<QTextEdit*>("descriptionEdit");
+    if (!descriptionEdit) return;
+
+    QString description = descriptionEdit->toPlainText().trimmed();
+    if (description.isEmpty()) {
+        QMessageBox::warning(this, "Description Required", "Please enter a review description.");
+        return;
+    }
+
+    // Insert into database
+    QSqlQuery query;
+    query.prepare("INSERT INTO review (score, DESCRIPTION) VALUES (:score, :description)");
+    query.bindValue(":score", currentRating);
+    query.bindValue(":description", description);
+
+    if (query.exec()) {
+        QMessageBox::information(this, "Success", "Review submitted successfully!");
+        // Reset form
+        updateStarRating(0);
+        descriptionEdit->clear();
+    } else {
+        QMessageBox::critical(this, "Error", "Failed to submit review: " + query.lastError().text());
+    }
 }

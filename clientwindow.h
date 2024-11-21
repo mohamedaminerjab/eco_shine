@@ -29,7 +29,8 @@ private slots:
     void on_deleteButton_clicked();
     void on_searchLineEdit_textChanged(const QString &text);
     void on_pdfButton_clicked();
-
+    void on_submitReviewButton_clicked();
+    void updateStarRating(int rating);
 
 
 
@@ -42,6 +43,8 @@ private:
     void updateStatsChart();
     QChart *statsChart;
     QChartView *chartView;
+    int currentRating;
+    QVector<QPushButton*> starButtons;
 };
 
 #endif // CLIENTWINDOW_H

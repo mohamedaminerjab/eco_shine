@@ -62,7 +62,7 @@
     <rect>
      <x>160</x>
      <y>110</y>
-     <width>113</width>
+     <width>151</width>
      <height>31</height>
     </rect>
    </property>
@@ -73,7 +73,7 @@ border-radius: 10px;           /* Adjust the radius for more or less rounding */
 padding: 5px;  </string>
    </property>
    <property name="placeholderText">
-    <string>entrer nom ...</string>
+    <string>entrer nouveau nom ...</string>
    </property>
   </widget>
   <widget class="QLineEdit" name="adresseLineEdit">
@@ -81,7 +81,7 @@ padding: 5px;  </string>
     <rect>
      <x>160</x>
      <y>160</y>
-     <width>113</width>
+     <width>151</width>
      <height>31</height>
     </rect>
    </property>
@@ -92,7 +92,7 @@ border-radius: 10px;           /* Adjust the radius for more or less rounding */
 padding: 5px;  </string>
    </property>
    <property name="placeholderText">
-    <string>entrer adresse ...</string>
+    <string>entrer nouveau adresse ...</string>
    </property>
   </widget>
   <widget class="QLineEdit" name="contactLineEdit">
@@ -100,7 +100,7 @@ padding: 5px;  </string>
     <rect>
      <x>160</x>
      <y>210</y>
-     <width>113</width>
+     <width>151</width>
      <height>31</height>
     </rect>
    </property>
@@ -111,7 +111,7 @@ border-radius: 10px;           /* Adjust the radius for more or less rounding */
 padding: 5px;  </string>
    </property>
    <property name="placeholderText">
-    <string>entrer contact ...</string>
+    <string>entrer nouveau contact ...</string>
    </property>
   </widget>
   <widget class="QDialogButtonBox" name="buttonBox">
