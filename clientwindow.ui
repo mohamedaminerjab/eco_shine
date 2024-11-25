@@ -31,7 +31,7 @@
     <string notr="true"/>
    </property>
    <property name="currentIndex">
-    <number>3</number>
+    <number>4</number>
    </property>
    <widget class="QWidget" name="tab">
     <attribute name="title">
@@ -253,6 +253,11 @@ border-radius: 10px; /* Adjust the radius for more or less rounding */</string>
     </attribute>
    </widget>
    <widget class="QWidget" name="tab_3">
+    <attribute name="title">
+     <string>Page</string>
+    </attribute>
+   </widget>
+   <widget class="QWidget" name="tab_4">
     <attribute name="title">
      <string>Page</string>
     </attribute>

@@ -152,6 +152,11 @@ clientwindow::clientwindow(Connection &conn, QWidget *parent) :
         mainLayout->addWidget(descriptionEdit);
         mainLayout->addWidget(submitButton);
         mainLayout->addStretch();
+
+        setupMessagingTab();
+        messageDialog = new MessageDialog(this);
+        connect(messageDialog, &MessageDialog::messageSent, this, &clientwindow::onPopupMessageReceived);
+
     }
 
 }
@@ -578,4 +583,69 @@ void clientwindow::on_submitReviewButton_clicked() {
     } else {
         QMessageBox::critical(this, "Error", "Failed to submit review: " + query.lastError().text());
     }
+}
+
+
+
+
+void clientwindow::setupMessagingTab()
+{
+    if (QWidget* messageTab = ui->tab_4) {
+        QVBoxLayout* layout = new QVBoxLayout(messageTab);
+
+        // Add a prominent button at the top to open the popup chat
+        QPushButton *showPopupButton = new QPushButton("Open Chat Window", messageTab);
+        showPopupButton->setStyleSheet(
+            "QPushButton {"
+            "    background-color: #4CAF50;"
+            "    color: white;"
+            "    padding: 8px 16px;"
+            "    font-size: 14px;"
+            "    border-radius: 4px;"
+            "}"
+            "QPushButton:hover {"
+            "    background-color: #45a049;"
+            "}"
+            );
+        layout->addWidget(showPopupButton);
+
+        chatHistory = new QTextEdit(messageTab);
+        chatHistory->setReadOnly(true);
+        layout->addWidget(chatHistory);
+
+        QHBoxLayout *inputLayout = new QHBoxLayout();
+        messageInput = new QLineEdit(messageTab);
+        sendButton = new QPushButton("Send", messageTab);
+
+        inputLayout->addWidget(messageInput);
+        inputLayout->addWidget(sendButton);
+
+        layout->addLayout(inputLayout);
+
+        connect(sendButton, &QPushButton::clicked, this, &clientwindow::onMainWindowMessageSent);
+        connect(messageInput, &QLineEdit::returnPressed, this, &clientwindow::onMainWindowMessageSent);
+        connect(showPopupButton, &QPushButton::clicked, this, [this]() {
+            messageDialog->show();
+            messageDialog->raise();
+            messageDialog->activateWindow();
+        });
+    }
+}
+void clientwindow::onMainWindowMessageSent()
+{
+    QString message = messageInput->text().trimmed();
+    if (!message.isEmpty()) {
+        QString timestamp = QDateTime::currentDateTime().toString("hh:mm:ss");
+        QString formattedMessage = QString("[%1] Rjab: %2").arg(timestamp, message);
+        chatHistory->append(formattedMessage);
+        messageDialog->addMessage(message, true);
+        messageInput->clear();
+    }
+}
+
+void clientwindow::onPopupMessageReceived(const QString &message)
+{
+    QString timestamp = QDateTime::currentDateTime().toString("hh:mm:ss");
+    QString formattedMessage = QString("[%1] Aymen: %2").arg(timestamp, message);
+    chatHistory->append(formattedMessage);
 }

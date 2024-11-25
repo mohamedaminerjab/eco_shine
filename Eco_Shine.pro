@@ -6,6 +6,9 @@
 
 QT       += core gui sql charts printsupport
 
+include(./Qt-QrCodeGenerator/Qt-QrCodeGenerator.pri)
+
+
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = Eco_Shine
@@ -28,11 +31,13 @@ SOURCES += \
     clientwindow.cpp \
         main.cpp \
     connection.cpp \
+    messagedialog.cpp \
     updateclientdialog.cpp
 
 HEADERS += \
     clientwindow.h \
     connection.h \
+    messagedialog.h \
     updateclientdialog.h
 
 FORMS += \
