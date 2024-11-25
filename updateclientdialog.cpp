@@ -1,6 +1,5 @@
 #include "updateclientdialog.h"
 #include "ui_updateclientdialog.h"
-#include "QRCodeGenerator.h"  // Include QRCodeGenerator from Qt-QrCodeGenerator
 
 
 updateclientdialog::updateclientdialog(const QString &id, const QString &nom, const QString &adresse, const QString &contact, QWidget *parent) :
@@ -47,8 +46,6 @@ void updateclientdialog::generateQRCode()
                              .arg(getContact());
 
     // Create an instance of the QRCodeGenerator class
-    auto image = m_generator.generateQr(clientData);
 
     // Display generated image
-    m_qrCodeDisplay->setPixmap(QPixmap::fromImage(image));
 }

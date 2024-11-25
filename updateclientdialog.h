@@ -4,7 +4,6 @@
 #include <QDialog>
 #include <QLabel>  // For the QR code label
 #include <QImage>  // For handling QImage
-#include <QrCodeGenerator.h>
 
 namespace Ui {
 class updateclientdialog;
@@ -29,7 +28,6 @@ private:
     void updateQRCode();  // Slot to update the QR code
     void generateQRCode();  // Method to generate the QR code
     QString clientId;  // Client ID (passed in constructor)
-    QrCodeGenerator m_generator;
     QLabel *m_qrCodeDisplay;
 
 

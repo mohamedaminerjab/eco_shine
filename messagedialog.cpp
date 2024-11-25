@@ -39,7 +39,7 @@ void MessageDialog::onSendClicked()
 void MessageDialog::addMessage(const QString &message, bool fromMain)
 {
     QString timestamp = QDateTime::currentDateTime().toString("hh:mm:ss");
-    QString source = fromMain ? "Main Window" : "Popup Window";
+    QString source = fromMain ? "Rjab" : "Aymen";
     QString formattedMessage = QString("[%1] %2: %3").arg(timestamp, source, message);
     chatHistory->append(formattedMessage);
 }
