@@ -14,16 +14,15 @@
 #include <QDateTime>
 
 
-clientwindow::clientwindow(Connection &conn, QWidget *parent) :
+clientwindow::clientwindow(QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::clientwindow),
-    connection(conn)
+    ui(new Ui::clientwindow)
 {
     ui->setupUi(this);
 
     // Initialize the model with the correct database connection
     model = new QSqlTableModel(this, QSqlDatabase::database());
-    model->setTable("client");  // Try lowercase table name
+    model->setTable("client");
 
     // Check if the table exists and is accessible
     if (!model->select()) {

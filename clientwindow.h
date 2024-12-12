@@ -19,7 +19,7 @@ class clientwindow : public QDialog
     Q_OBJECT
 
 public:
-    explicit clientwindow(Connection &conn, QWidget *parent = nullptr);
+    explicit clientwindow(QWidget *parent = nullptr);
     ~clientwindow();
 
 private slots:
@@ -41,7 +41,7 @@ private slots:
 
 private:
     Ui::clientwindow *ui;
-    Connection &connection;
+   // Connection &connection;
     QSqlTableModel *model;
     void updateStatsChart();
     QChart *statsChart;
